@@ -24,12 +24,12 @@ class TradeResult {
     required List<TradeLine> receive,
     double tolerancePercent = 5,
   }) {
-    if (offer.isEmpty && receive.isEmpty) {
+    if (offer.isEmpty || receive.isEmpty) {
       return const TradeResult(
-        offerTotal: 0,
-        receiveTotal: 0,
-        difference: 0,
-        percentDifference: 0,
+        offerTotal: null,
+        receiveTotal: null,
+        difference: null,
+        percentDifference: null,
         hasUnknownData: false,
         verdict: TradeVerdict.empty,
       );
