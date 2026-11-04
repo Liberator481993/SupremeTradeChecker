@@ -23,6 +23,23 @@ void main() {
     expect(parsed.sourceUpdatedLabel, 'November 2nd, 2026 at 12:34 PM');
   });
 
+  test('parses current page rows when the stability icon alt text is present', () {
+    const html = '''
+      <html><body>
+        <div>Image: Travelers Gun | Traveler's Gun Value - 5,200
+          Range - [N/A] Stability - Stable Image: Item Stability
+          Demand - 5 Rarity - 5
+          Origin - Halloween 2023 (Unboxed) Change in Value - (-100)
+        </div>
+      </body></html>
+    ''';
+
+    final parsed = SupremeValuesParser.parse(html, 'godlies');
+    expect(parsed.items, hasLength(1));
+    expect(parsed.items.single.name, "Traveler's Gun");
+    expect(parsed.items.single.value, 5200);
+  });
+
   test('extracts the set name before the Contains field', () {
     const html = '''
       <html><body>
