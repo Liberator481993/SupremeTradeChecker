@@ -262,7 +262,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9B83FF).withOpacity(0.14),
+                    color: const Color(0xFF9B83FF).withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -431,9 +431,9 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
               decoration: BoxDecoration(
-                color: verdictColor.withOpacity(0.10),
+                color: verdictColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: verdictColor.withOpacity(0.36)),
+                border: Border.all(color: verdictColor.withValues(alpha: 0.36)),
               ),
               child: Column(
                 children: [
@@ -814,7 +814,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
                 label: const Text('Add item'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: widget.accent,
-                  side: BorderSide(color: widget.accent.withOpacity(0.38)),
+                  side: BorderSide(color: widget.accent.withValues(alpha: 0.38)),
                   padding: const EdgeInsets.symmetric(vertical: 11),
                 ),
               ),
