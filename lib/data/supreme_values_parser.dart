@@ -19,6 +19,12 @@ class SupremeValuesParser {
     dotAll: true,
   );
 
+  static final RegExp _untradablePattern = RegExp(
+    r'([^|]{1,100}?)\s+Rarity\s*-\s*(\d+|Coming Soon!)(?:\s+Description\s*-\s*(.*?))?(?:\s+Death Effect\s*-\s*(.*?))?\s+Origin\s*-\s*([^|]+)',
+    caseSensitive: false,
+    dotAll: true,
+  );
+
   static ParsedCatalogPage parse(String source, String category) {
     final document = html_parser.parse(source);
     for (final node in document.querySelectorAll('script, style, noscript')) {
@@ -36,6 +42,13 @@ class SupremeValuesParser {
       caseSensitive: false,
     ).firstMatch(text);
     final sourceUpdatedLabel = updatedMatch?.group(1)?.trim();
+
+    if (category == 'untradables') {
+      return ParsedCatalogPage(
+        items: _parseUntradables(text),
+        sourceUpdatedLabel: sourceUpdatedLabel,
+      );
+    }
 
     final byId = <String, CatalogItem>{};
     for (final match in _rowPattern.allMatches(text)) {
@@ -87,6 +100,32 @@ class SupremeValuesParser {
       items: byId.values.toList(growable: false),
       sourceUpdatedLabel: sourceUpdatedLabel,
     );
+  }
+
+  static List<CatalogItem> _parseUntradables(String text) {
+    final byId = <String, CatalogItem>{};
+    for (final match in _untradablePattern.allMatches(text)) {
+      var name = (match.group(1) ?? '').trim();
+      name = name.replaceFirst(RegExp(r'^Image:\s*', caseSensitive: false), '');
+      name = name.replaceAll(RegExp(r'^[-|\s]+|[-|\s]+$'), '').trim();
+      if (name.isEmpty || name.length > 80) continue;
+
+      final rarityText = match.group(2) ?? '';
+      final rarity = int.tryParse(rarityText);
+      if (rarity != null && (rarity < 1 || rarity > 10)) continue;
+      final origin = match.group(5)?.trim();
+      final id = CatalogItem.makeId('untradables', name);
+
+      byId[id] = CatalogItem(
+        id: id,
+        name: name,
+        category: 'untradables',
+        value: null,
+        rarity: rarity,
+        origin: origin?.isEmpty == true ? null : origin,
+      );
+    }
+    return byId.values.toList(growable: false);
   }
 
   static double? _parseNumber(String input) {
