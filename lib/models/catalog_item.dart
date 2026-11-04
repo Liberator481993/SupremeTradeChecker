@@ -70,6 +70,7 @@ class CatalogItem {
   static String normalize(String input) {
     return input
         .toLowerCase()
+        .replaceAll(RegExp(r"[’']"), '')
         .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
         .trim()
         .replaceAll(RegExp(r'\s+'), ' ');
