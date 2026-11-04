@@ -105,6 +105,10 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
         _loading = false;
         _loadError = null;
       });
+      if (_catalog.isEmpty) {
+        // A fresh install has no local values yet. Fetch the catalogue automatically.
+        await _refreshCatalog();
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -191,7 +195,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
               ),
             ),
             Text(
-              'MM2 • Offline calculator',
+              'MM2 • Офлайн-калькулятор',
               style: TextStyle(
                 color: Color(0xFF8E9AB1),
                 fontSize: 11,
@@ -202,7 +206,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
         ),
         actions: [
           IconButton(
-            tooltip: 'Clear trade',
+            tooltip: 'Очистить обмен',
             onPressed: _clearTrade,
             icon: const Icon(Icons.delete_sweep_outlined),
           ),
@@ -217,8 +221,8 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                 _catalogStatusCard(),
                 const SizedBox(height: 14),
                 TradeSideEditor(
-                  title: 'YOUR OFFER',
-                  subtitle: 'Items you are giving',
+                  title: 'ТЫ ОТДАЁШЬ',
+                  subtitle: 'Предметы, которые отдаёшь',
                   accent: const Color(0xFF69C9F5),
                   lines: _offer,
                   onChanged: _setOffer,
@@ -229,8 +233,8 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                 ),
                 const SizedBox(height: 14),
                 TradeSideEditor(
-                  title: 'YOU RECEIVE',
-                  subtitle: 'Items you are getting',
+                  title: 'ТЫ ПОЛУЧАЕШЬ',
+                  subtitle: 'Предметы, которые получаешь',
                   accent: const Color(0xFFB69BFF),
                   lines: _receive,
                   onChanged: _setReceive,
@@ -276,7 +280,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'LOCAL VALUE DATABASE',
+                        'ЛОКАЛЬНАЯ БАЗА ЦЕН',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -286,8 +290,8 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                       const SizedBox(height: 3),
                       Text(
                         hasCatalog
-                            ? '${_catalog.length} items saved on this device'
-                            : 'No local catalogue yet',
+                            ? 'Предметов на устройстве: ${_catalog.length}'
+                            : 'База предметов ещё не загружена',
                         style: const TextStyle(
                           color: Color(0xFF9AA7BF),
                           fontSize: 12,
@@ -306,12 +310,12 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
             ),
             if (_lastFetchedAt != null) ...[
               const SizedBox(height: 12),
-              _metadataLine('Downloaded', _formatDate(_lastFetchedAt)),
+              _metadataLine('Загружено', _formatDate(_lastFetchedAt)),
             ],
             if (_sourceUpdatedLabel != null &&
                 _sourceUpdatedLabel!.isNotEmpty) ...[
               const SizedBox(height: 5),
-              _metadataLine('Source update', _sourceUpdatedLabel!),
+              _metadataLine('Обновление источника', _sourceUpdatedLabel!),
             ],
             if (_loadError != null) ...[
               const SizedBox(height: 8),
@@ -333,14 +337,14 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                       )
                     : const Icon(Icons.sync_rounded),
                 label: Text(
-                  _refreshing ? 'Updating catalogue…' : 'Update database',
+                  _refreshing ? 'Загрузка базы…' : 'Обновить базу',
                 ),
               ),
             ),
             if (!hasCatalog) ...[
               const SizedBox(height: 7),
               const Text(
-                'Connect to the internet and update once. The saved catalogue can then be used offline.',
+                'Подключись к интернету. База загрузится автоматически и затем будет доступна офлайн.',
                 style: TextStyle(
                   color: Color(0xFF8794AC),
                   fontSize: 11,
@@ -375,6 +379,21 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
     );
   }
 
+  String _verdictLabel(TradeVerdict verdict) {
+    switch (verdict) {
+      case TradeVerdict.win:
+        return 'ВЫИГРЫШ';
+      case TradeVerdict.fair:
+        return 'РАВНОЦЕННО';
+      case TradeVerdict.lose:
+        return 'ПРОИГРЫШ';
+      case TradeVerdict.unknown:
+        return 'НЕТ ДАННЫХ';
+      case TradeVerdict.empty:
+        return 'ДОБАВЬ ПРЕДМЕТЫ';
+    }
+  }
+
   Widget _resultCard(TradeResult result) {
     final Color verdictColor;
     switch (result.verdict) {
@@ -398,12 +417,12 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
     final offerValue = result.verdict == TradeVerdict.empty
         ? '—'
         : result.offerTotal == null
-            ? 'UNKNOWN'
+            ? 'НЕТ ДАННЫХ'
         : _formatValue(result.offerTotal!);
     final receiveValue = result.verdict == TradeVerdict.empty
         ? '—'
         : result.receiveTotal == null
-            ? 'UNKNOWN'
+            ? 'НЕТ ДАННЫХ'
         : _formatValue(result.receiveTotal!);
     final differenceValue = result.difference == null
         ? '—'
@@ -419,7 +438,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'TRADE RESULT',
+              'РЕЗУЛЬТАТ ОБМЕНА',
               style: TextStyle(
                 fontSize: 12,
                 letterSpacing: 1,
@@ -438,7 +457,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
               child: Column(
                 children: [
                   Text(
-                    result.label,
+                    _verdictLabel(result.verdict),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: verdictColor,
@@ -449,7 +468,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Default tolerance: ±5%',
+                    'Допустимая разница: ±5%',
                     style: TextStyle(color: Color(0xFF929FB7), fontSize: 11),
                   ),
                 ],
@@ -459,11 +478,11 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _totalTile('YOU GIVE', offerValue),
+                  child: _totalTile('ТЫ ОТДАЁШЬ', offerValue),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _totalTile('YOU GET', receiveValue),
+                  child: _totalTile('ТЫ ПОЛУЧАЕШЬ', receiveValue),
                 ),
               ],
             ),
@@ -472,14 +491,14 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: _smallMetric('Difference', differenceValue)),
-                Expanded(child: _smallMetric('Difference %', percentageValue)),
+                Expanded(child: _smallMetric('Разница', differenceValue)),
+                Expanded(child: _smallMetric('Разница %', percentageValue)),
               ],
             ),
             if (result.verdict == TradeVerdict.unknown) ...[
               const SizedBox(height: 12),
               const Text(
-                'At least one item is missing a reliable catalogue value or is not matched exactly. No WIN / FAIR / LOSE verdict is calculated.',
+                'Как минимум один предмет не найден в базе или у него нет числовой цены. Итог обмена не рассчитан.',
                 style: TextStyle(
                   color: Color(0xFFFFC56D),
                   fontSize: 11,
@@ -490,7 +509,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
             if (result.verdict == TradeVerdict.empty) ...[
               const SizedBox(height: 12),
               const Text(
-                'Add at least one recognised item to both sides to calculate the trade.',
+                'Добавь хотя бы один найденный предмет с каждой стороны, чтобы рассчитать обмен.',
                 style: TextStyle(
                   color: Color(0xFF929FB7),
                   fontSize: 11,
@@ -559,7 +578,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 4),
       child: Text(
-        'Values are community estimates from Supreme Values, not official Roblox prices. The app is a manual calculator only; it does not connect to Roblox or perform trades.',
+        'Цены — оценки сообщества Supreme Values, а не официальные цены Roblox. Это ручной калькулятор: он не подключается к Roblox и не совершает обмены.',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Color(0xFF68758D),
@@ -571,7 +590,7 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
   }
 
   String _formatDate(String? raw) {
-    if (raw == null) return 'Not available';
+    if (raw == null) return 'Нет данных';
     final date = DateTime.tryParse(raw)?.toLocal();
     if (date == null) return raw;
     final d = date.day.toString().padLeft(2, '0');
@@ -641,7 +660,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
     final quantity = int.tryParse(_quantityController.text.trim()) ?? 1;
     if (quantity < 1 || quantity > 999) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Quantity must be between 1 and 999.')),
+        const SnackBar(content: Text('Количество должно быть от 1 до 999.')),
       );
       return;
     }
@@ -727,7 +746,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
                   ),
                 ),
                 Text(
-                  '${widget.lines.length} items',
+                  'Предметов: ${widget.lines.length}',
                   style: const TextStyle(
                     color: Color(0xFF9AA7BF),
                     fontSize: 11,
@@ -746,7 +765,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
                     onSubmitted: (_) => _addItem(),
                     textInputAction: TextInputAction.done,
                     decoration: const InputDecoration(
-                      hintText: 'Search item name',
+                      hintText: 'Поиск предмета по названию',
                       prefixIcon: Icon(Icons.search_rounded),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -761,7 +780,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     decoration: const InputDecoration(
-                      labelText: 'Qty',
+                      labelText: 'Кол-во',
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                     ),
@@ -788,7 +807,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
                             style: const TextStyle(fontSize: 12),
                           ),
                           subtitle: Text(
-                            '${item.category.toUpperCase()} • ${item.value == null ? 'NO NUMERIC VALUE' : _price(item.value!)}',
+                            '${item.category.toUpperCase()} • ${item.value == null ? 'НЕТ ЧИСЛОВОЙ ЦЕНЫ' : _price(item.value!)}',
                             style: const TextStyle(
                               color: Color(0xFF8996AE),
                               fontSize: 10,
@@ -811,7 +830,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
               child: OutlinedButton.icon(
                 onPressed: _addItem,
                 icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Add item'),
+                label: const Text('Добавить предмет'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: widget.accent,
                   side: BorderSide(color: widget.accent.withValues(alpha: 0.38)),
@@ -854,7 +873,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  known ? 'Unit: ${_price(line.item!.value!)}' : 'UNKNOWN DATA',
+                  known ? 'Цена за шт.: ${_price(line.item!.value!)}' : 'НЕТ ДАННЫХ',
                   style: TextStyle(
                     color: known
                         ? const Color(0xFF8996AE)
@@ -867,7 +886,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
-            tooltip: 'Decrease quantity',
+            tooltip: 'Уменьшить количество',
             onPressed: () => _changeQuantity(line, -1),
             icon: const Icon(Icons.remove_circle_outline, size: 18),
           ),
@@ -880,14 +899,14 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
-            tooltip: 'Increase quantity',
+            tooltip: 'Увеличить количество',
             onPressed: () => _changeQuantity(line, 1),
             icon: const Icon(Icons.add_circle_outline, size: 18),
           ),
           SizedBox(
             width: 70,
             child: Text(
-              amount == null ? 'UNKNOWN' : _price(amount),
+              amount == null ? 'НЕТ ДАННЫХ' : _price(amount),
               textAlign: TextAlign.end,
               style: TextStyle(
                 color: known ? Colors.white : const Color(0xFFFFC56D),
@@ -898,7 +917,7 @@ class _TradeSideEditorState extends State<TradeSideEditor> {
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
-            tooltip: 'Remove item',
+            tooltip: 'Удалить предмет',
             onPressed: () => _removeLine(line),
             icon: const Icon(
               Icons.close_rounded,
