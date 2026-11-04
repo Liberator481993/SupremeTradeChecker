@@ -54,4 +54,28 @@ void main() {
     expect(parsed.items, hasLength(1));
     expect(parsed.items.single.value, isNull);
   });
+
+  test('imports untradables as catalogue entries with no invented price', () {
+    const html = '''
+      <html><body>
+        <div>Image: Abduction | Abduction Rarity - 3
+          Description - Surrounds Knife in a Tractor Beam
+          Death Effect - N/A Origin - Halloween 2025 (Tier 24)
+        </div>
+        <div>Image: Cauldron | Cauldron Rarity - Coming Soon!
+          Description - Gives Knife Green Bubble Particles
+          Death Effect - N/A Origin - Halloween 2026 (Tier 22)
+        </div>
+      </body></html>
+    ''';
+
+    final parsed = SupremeValuesParser.parse(html, 'untradables');
+    expect(parsed.items, hasLength(2));
+    expect(parsed.items.firstWhere((item) => item.name == 'Abduction').value,
+        isNull);
+    expect(parsed.items.firstWhere((item) => item.name == 'Abduction').rarity,
+        3);
+    expect(parsed.items.firstWhere((item) => item.name == 'Cauldron').rarity,
+        isNull);
+  });
 }
