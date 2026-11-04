@@ -20,7 +20,7 @@ class SupremeValuesParser {
   );
 
   static final RegExp _untradablePattern = RegExp(
-    r'([^|]{1,100}?)\s+Rarity\s*-\s*(\d+|Coming Soon!)(?:\s+Description\s*-\s*(.*?))?(?:\s+Death Effect\s*-\s*(.*?))?\s+Origin\s*-\s*([^|]+)',
+    r'([^|]{1,100}?)\s+Rarity\s*-\s*(\d+|Coming Soon!)(?:\s+Description\s*-\s*(.*?))?(?:\s+Death Effect\s*-\s*(.*?))?\s+Origin\s*-\s*(.+?)(?=\s+Image:\s*|\||$)',
     caseSensitive: false,
     dotAll: true,
   );
