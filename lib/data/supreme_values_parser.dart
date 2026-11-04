@@ -14,7 +14,7 @@ class ParsedCatalogPage {
 
 class SupremeValuesParser {
   static final RegExp _rowPattern = RegExp(
-    r'([^|]{1,100}?)\s+Value\s*-\s*(.*?)\s+Range\s*-\s*(\[[^\]]*\]|N/?A)\s+Stability\s*-\s*(.*?)\s+Demand\s*-\s*(\d+)\s*Rarity\s*-\s*(\d+)',
+    r'([^|]{1,100}?)\s+Value\s*-\s*(.*?)\s+Range\s*-\s*(\[[^\]]*\]|N/?A)\s+Stability\s*-\s*(.*?)\s+(?:Image:\s*Item Stability\s*)?Demand\s*-\s*(\d+)\s*Rarity\s*-\s*(\d+)',
     caseSensitive: false,
     dotAll: true,
   );
