@@ -14,7 +14,7 @@ class ParsedCatalogPage {
 
 class SupremeValuesParser {
   static final RegExp _rowPattern = RegExp(
-    r'([^|]{1,100}?)\s+Value\s*-\s*(.*?)\s+Range\s*-\s*(\[[^\]]*\]|N/?A)\s+Stability\s*-\s*(.*?)\s+Demand\s*-\s*(\d+)\s+Rarity\s*-\s*(\d+)',
+    r'([^|]{1,100}?)\s+Value\s*-\s*(.*?)\s+Range\s*-\s*(\[[^\]]*\]|N/?A)\s+Stability\s*-\s*(.*?)\s+Demand\s*-\s*(\d+)\s*Rarity\s*-\s*(\d+)',
     caseSensitive: false,
     dotAll: true,
   );
@@ -41,6 +41,7 @@ class SupremeValuesParser {
     for (final match in _rowPattern.allMatches(text)) {
       var name = (match.group(1) ?? '').trim();
       name = name.replaceFirst(RegExp(r'^Image:\s*', caseSensitive: false), '');
+      name = name.split(RegExp(r'\s+Contains\s*-\s*')).first.trim();
       name = name.replaceAll(RegExp(r'^[-|\s]+|[-|\s]+$'), '').trim();
 
       if (name.isEmpty || name.length > 80) continue;
@@ -89,8 +90,9 @@ class SupremeValuesParser {
   }
 
   static double? _parseNumber(String input) {
-    final cleaned = input.trim().replaceAll(',', '');
-    if (!RegExp(r'^\d+(?:\.\d+)?$').hasMatch(cleaned)) return null;
+    final match = RegExp(r'^\s*([\d,]+(?:\.\d+)?)').firstMatch(input);
+    if (match == null) return null;
+    final cleaned = match.group(1)!.replaceAll(',', '');
     final value = double.tryParse(cleaned);
     if (value == null || !value.isFinite || value < 0 || value > 1000000000) {
       return null;
