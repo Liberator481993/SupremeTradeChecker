@@ -382,21 +382,30 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
     switch (result.verdict) {
       case TradeVerdict.win:
         verdictColor = const Color(0xFF70D6AB);
+        break;
       case TradeVerdict.fair:
         verdictColor = const Color(0xFF8DBBFF);
+        break;
       case TradeVerdict.lose:
         verdictColor = const Color(0xFFFF8D97);
+        break;
       case TradeVerdict.unknown:
         verdictColor = const Color(0xFFFFC56D);
+        break;
       case TradeVerdict.empty:
         verdictColor = const Color(0xFF9AA7BF);
+        break;
     }
 
-    final offerValue = result.offerTotal == null
-        ? 'UNKNOWN'
+    final offerValue = result.verdict == TradeVerdict.empty
+        ? '—'
+        : result.offerTotal == null
+            ? 'UNKNOWN'
         : _formatValue(result.offerTotal!);
-    final receiveValue = result.receiveTotal == null
-        ? 'UNKNOWN'
+    final receiveValue = result.verdict == TradeVerdict.empty
+        ? '—'
+        : result.receiveTotal == null
+            ? 'UNKNOWN'
         : _formatValue(result.receiveTotal!);
     final differenceValue = result.difference == null
         ? '—'
