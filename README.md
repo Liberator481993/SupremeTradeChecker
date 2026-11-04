@@ -9,7 +9,7 @@ This is a separate project. It does not modify or depend on the LiberiumHub Robl
 - Offline-first item catalogue stored locally in SQLite.
 - Manual refresh from the public Supreme Values category pages.
 - Manual offer / receive entry with quantities.
-- Strict item matching: exact item name or exact alias only. Ambiguous or unpriced items remain **UNKNOWN DATA** and are never treated as zero.
+- Strict item matching: exact normalized item names only; there is no fuzzy auto-match. Ambiguous or unpriced items remain **UNKNOWN DATA** and are never treated as zero. Untradable entries are imported without invented prices.
 - WIN / FAIR / LOSE result using a configurable-in-code default tolerance of ±5%.
 - Atomic catalogue refresh: failed or incomplete downloads do not replace the last good database.
 
