@@ -220,7 +220,6 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                   title: 'YOUR OFFER',
                   subtitle: 'Items you are giving',
                   accent: const Color(0xFF69C9F5),
-                  catalog: _catalog,
                   lines: _offer,
                   onChanged: _setOffer,
                   search: (query) =>
@@ -233,7 +232,6 @@ class _TradeHomeScreenState extends State<TradeHomeScreen> {
                   title: 'YOU RECEIVE',
                   subtitle: 'Items you are getting',
                   accent: const Color(0xFFB69BFF),
-                  catalog: _catalog,
                   lines: _receive,
                   onChanged: _setReceive,
                   search: (query) =>
@@ -600,7 +598,6 @@ class TradeSideEditor extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.accent,
-    required this.catalog,
     required this.lines,
     required this.onChanged,
     required this.search,
@@ -611,7 +608,6 @@ class TradeSideEditor extends StatefulWidget {
   final String title;
   final String subtitle;
   final Color accent;
-  final List<CatalogItem> catalog;
   final List<TradeLine> lines;
   final ValueChanged<List<TradeLine>> onChanged;
   final List<CatalogItem> Function(String query) search;
