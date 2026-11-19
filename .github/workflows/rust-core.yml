@@ -1,0 +1,22 @@
+name: Rust Core
+
+on:
+  push:
+    branches: [rust-core-bootstrap]
+    paths:
+      - "rust-core/**"
+      - ".github/workflows/rust-core.yml"
+  pull_request:
+    paths:
+      - "rust-core/**"
+      - ".github/workflows/rust-core.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test Rust Core
+        run: cargo test --manifest-path rust-core/Cargo.toml
