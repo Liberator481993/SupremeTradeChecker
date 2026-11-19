@@ -1,0 +1,10 @@
+[package]
+name = "supreme-values-core"
+version = "0.1.0"
+edition = "2021"
+description = "Rust catalogue normalizer for Supreme Values MM2 exports"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
